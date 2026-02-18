@@ -1,0 +1,11 @@
+torch
+torchvision
+ultralytics
+pandas
+numpy
+tqdm
+matplotlib
+torchmetrics
+segmentation-models-pytorch
+albumentations
+Pillow
