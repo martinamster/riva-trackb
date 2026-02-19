@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 import math
 from tqdm import tqdm
+import cv2
+import torch
+import torch.nn as nn
+from torchvision import transforms, models
+from PIL import Image
+import os
 
 def fix_dup_ids(df, output_csv):
     df['id'] = range(1, len(df) + 1)
@@ -75,7 +81,7 @@ def calculate_iou(box1, box2):
     return inter_area / union_area if union_area > 0 else 0
 
 
-def apply_nms(df, output_path, iou_thresh=0.75):
+def apply_nms(df, iou_thresh=0.75):
     
     
     df = df.sort_values(by='conf', ascending=False).reset_index(drop=True)
@@ -101,7 +107,7 @@ def apply_nms(df, output_path, iou_thresh=0.75):
                         is_suppressed[j] = True
 
     df_final = df.loc[true_keeps].sort_values(by=['image_filename', 'conf'], ascending=[True, False])
-    fix_dup_ids(df_final, output_path)
+    return df_final.reset_index(drop=True)
     
 
 
@@ -166,3 +172,87 @@ def dynamic_threshold_filter(df_full, grid_size,detections,img_width=1024, img_h
     else:
         return pd.DataFrame(columns=df_full.columns)
 
+
+
+
+def load_model(model_path, device):
+    model = models.efficientnet_b0(pretrained=False)
+    in_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(in_features, 1)
+    
+    state_dict = torch.load(model_path, map_location=device)
+    model.load_state_dict(state_dict)
+    model.to(device)
+    model.eval()
+    return model
+
+def filter_predictions(df_full, model_path, images_dir, yolo_conf_upper, binary_threshold, img_size=299, device='cuda'):
+    model = load_model(model_path, device)
+    
+    transform = transforms.Compose([
+        transforms.Resize((img_size, img_size)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+
+    print("Starting binary classification...")
+    
+    grouped = df_full.groupby('image_filename')
+    final_rows = []
+
+    for img_name, group in tqdm(grouped):
+        if group['conf'].min() > yolo_conf_upper:
+            for _, row in group.iterrows():
+                final_rows.append(row.to_dict())
+            continue
+
+        img_path = os.path.join(images_dir, img_name)
+        if not os.path.exists(img_path):
+            for _, row in group.iterrows(): 
+                final_rows.append(row.to_dict())
+            continue
+
+        img_pil = Image.open(img_path).convert("RGB")
+        w_img, h_img = img_pil.size
+        
+        batch_crops = []
+        batch_indices = [] 
+        rows_list = group.to_dict('records')
+
+        for i, row in enumerate(rows_list):
+            if row['conf'] > yolo_conf_upper:
+                final_rows.append(row)
+            else:
+                x, y, w, h = row['x'], row['y'], row['width'], row['height']
+                left = max(0, int(x - w/2))
+                upper = max(0, int(y - h/2))
+                right = min(w_img, int(x + w/2))
+                lower = min(h_img, int(y + h/2))
+                
+                crop = img_pil.crop((left, upper, right, lower))
+                
+                if crop.size[0] > 0 and crop.size[1] > 0:
+                    batch_crops.append(transform(crop))
+                    batch_indices.append(i)
+
+        if batch_crops:
+            # Internal mini-batching to prevent OutOfMemory errors
+            MINI_BATCH_SIZE = 8
+            all_probs = []
+
+            for i in range(0, len(batch_crops), MINI_BATCH_SIZE):
+                mini_batch = torch.stack(batch_crops[i : i + MINI_BATCH_SIZE]).to(device)
+                with torch.no_grad():
+                    outputs = model(mini_batch)
+                    probs = torch.sigmoid(outputs).cpu().numpy().flatten()
+                    all_probs.extend(probs)
+                del mini_batch
+                torch.cuda.empty_cache()
+            
+            for idx_in_batch, prob in enumerate(all_probs):
+                original_row_idx = batch_indices[idx_in_batch]
+                row = rows_list[original_row_idx]
+                if prob > binary_threshold:
+                    final_rows.append(row)
+
+    return pd.DataFrame(final_rows)

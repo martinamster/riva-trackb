@@ -17,6 +17,7 @@ args = parser.parse_args()
 data_path = args.competition_path
 
 if not os.path.exists(data_path):
+    print("Path not found.")
     quit()
 
 
@@ -36,7 +37,8 @@ df_final, _ = ensemble(prediction2, prediction1, 12, 0.3)
 df_final, _ = ensemble(df_final, prediction3, 12, 0)
 
 
-apply_nms(df_final, 'predictions.csv', iou_thresh=0.75)
-df_final = pd.read_csv('predictions.csv')
-df_submission = dynamic_threshold_filter(df_final, 4, detections=30)
-df_submission.to_csv('submission.csv', index=False)
+df_nms = apply_nms(df_final, iou_thresh=0.75)
+df_filter = dynamic_threshold_filter(df_nms, 4, detections=30)
+
+df_submission = filter_predictions(df_filter, 'models/garbage_classifier.pth', data_path, yolo_conf_upper=0.01, binary_threshold=0.05, img_size=224, device=DEVICE)
+fix_dup_ids(df_submission, "submission.csv")
