@@ -31,14 +31,15 @@ Training the U-net and YOLO 100x100:
 python3 run_train.py route_to_folder
 ```
 Where route_to_folder is the route on your device where you have the training data. The training data should be organized exactly like this:
-
-route_to_folder/ \
-├── annotations/ \
-│   ├── train.csv  \        
-│   └── val.csv    \       
-└── images/    \
-    ├── train/      \           
-    └── val/              
+route_to_folder/
+├── annotations/
+│   ├── train.csv
+│   └── val.csv
+└── images/
+    ├── train/
+    │   └── (all the training images)
+    └── val/
+        └── (all validation images)
 This training is an example, the parameters may be changed. For the competition we trained the YOLO models with different box sizes
 
 ### Binary classificator training
