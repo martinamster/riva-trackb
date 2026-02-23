@@ -1,6 +1,6 @@
 # Riva Cytology Challenge - Track b
 
-This project implements a Deep Learning pipeline for cancer cell detection in pap smear images, combining object detection (**YOLOv8**) and segmentation-based localization (**U-Net**) through heatmap regression.
+This project implements a Deep Learning pipeline for cancer cell detection in Pap smear images, combining object detection (**YOLOv8**) and segmentation-based localization (**U-Net**) through heatmap regression.
 
 The system uses an ensemble approach to maximize detection accuracy:
 * **YOLOv8 nano (20x20)** 
@@ -15,7 +15,7 @@ The system uses an ensemble approach to maximize detection accuracy:
 * `preparation.py`: Utilities to convert CSV annotations to YOLO format and normalize labels.
 * `inference.py`: Helper functions for prediction for both YOLO and U-net.
 * `post_process.py`: Functions to optimize the results post training.
-* `train_classifier.py`: All the code necessary to train the binary (cell/garbage) classifier
+* `train_classifier.py`: All the code necessary to train the binary (cell/garbage) classifier.
 * `requirements.txt`: Packages needed for the project.
 * `Models`: Pre-trained models.
 
@@ -26,7 +26,7 @@ First, install all the packages necessary for the project:
 pip install -r requirements.txt
 ``` 
 ### Model training
-Training the U-net and YOLO 100x100:
+Training the U-Net and YOLO 100x100:
 ```
 python3 run_train.py route_to_folder
 ```
@@ -42,18 +42,18 @@ route_to_folder/
     └── val/
         └── (all validation images)
 ```
-This training is an example, the parameters may be changed. For the competition we trained the YOLO models with different box sizes
+This training is an example, the parameters may be changed. For the competition we trained the YOLO models with different box sizes.
 
 ### Binary classificator training
 If you want to train the binary classificator using the train part of the dataset:
 ```
 python3 train_classifier.py route_to_folder
 ```
-Using the same file organization as before
+Using the same file organization as before.
 
 ### Replicating the results of the competition
-The following command produces a file submission.csv identical to our submission to the challenge.
+The following command produces a file submission.csv identical to our submission to the challenge:
 ```
 python3 main.py route_to_test_images
 ```
-If you replace route_to_test_images with the route to the images of testing downloaded from kaggle it will produce the csv file.
+If you replace route_to_test_images with the route to the testing images downloaded from kaggle it will produce the csv file.
