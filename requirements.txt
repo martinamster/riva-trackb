@@ -9,3 +9,5 @@ torchmetrics
 segmentation-models-pytorch
 albumentations
 Pillow
+opencv-python
+scikit-learn

@@ -147,19 +147,8 @@ def dynamic_threshold_filter(df_full, grid_size,detections,img_width=1024, img_h
                 
                 keepers = cell_preds[cell_preds['conf'] >= threshold].copy()
                 
-                if keepers.empty and not cell_preds.empty:
-                    merged_row = {
-                        'image_filename': img_name,
-                        'class': cell_preds['class'].iloc[0],
-                        'x': cell_preds['x'].mean(),
-                        'y': cell_preds['y'].mean(),
-                        'width': cell_preds['width'].mean(),
-                        'height': cell_preds['height'].mean(),
-                        'conf': cell_preds['conf'].max() 
-                    }
-                    keepers = pd.DataFrame([merged_row])
-                
-                current_img_preds.append(keepers)
+                if not keepers.empty:
+                    current_img_preds.append(keepers)
         
         if current_img_preds:
             filtered_dfs.append(pd.concat(current_img_preds))
@@ -186,7 +175,7 @@ def load_model(model_path, device):
     model.eval()
     return model
 
-def filter_predictions(df_full, model_path, images_dir, yolo_conf_upper, binary_threshold, img_size=299, device='cuda'):
+def filter_predictions(df_full, model_path, images_dir, yolo_conf_upper, binary_threshold, img_size=224, device='cuda'):
     model = load_model(model_path, device)
     
     transform = transforms.Compose([
@@ -236,7 +225,6 @@ def filter_predictions(df_full, model_path, images_dir, yolo_conf_upper, binary_
                     batch_indices.append(i)
 
         if batch_crops:
-            # Internal mini-batching to prevent OutOfMemory errors
             MINI_BATCH_SIZE = 8
             all_probs = []
 

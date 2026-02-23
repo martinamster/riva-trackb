@@ -34,6 +34,8 @@ train_unet(root, epochs=15, batch_size=4, lr=1e-4, img_size=1024)
 print("Training YOLO...")
 train_yolo(root)
 
+
+
 """"
 This is just an example of how to run the training functions. It can be modified as needed
 For example, in the competition we trained two YOLO models with different cage sizes and also a U-Net model.

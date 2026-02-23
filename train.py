@@ -121,7 +121,7 @@ def train_unet(base_dir, epochs=15, batch_size=4, lr=1e-4, img_size=1024):
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    print(f"🚀 Training U-Net on {device}...")
+    print(f" Training U-Net on {device}...")
     for epoch in range(epochs):
         model.train()
         for images, masks in tqdm(train_loader, desc=f"Epoch {epoch+1}"):
@@ -135,6 +135,4 @@ def train_unet(base_dir, epochs=15, batch_size=4, lr=1e-4, img_size=1024):
             
     torch.save(model.state_dict(), "best_unet_trained.pth")
     return model
-
-
 

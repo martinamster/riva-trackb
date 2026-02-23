@@ -30,15 +30,15 @@ prediction2 = predictYOLO(0.001, 0.48, model_50, data_path)
 
 unet_path = 'models/best_unet.pth'
 
-prediction3 = run_unet_inference(unet_path, data_path, threshold=0.2, k_size=25, multiscale=True, device=DEVICE)
+prediction3 = run_unet_inference(unet_path, data_path, threshold=0.2, k_size=25, multiscale=True, device=DEVICE) 
 
 
-df_final, _ = ensemble(prediction2, prediction1, 12, 0.3)
+df_final, _ = ensemble(prediction2, prediction1, 12, 0.35) 
 df_final, _ = ensemble(df_final, prediction3, 12, 0)
 
 
 df_nms = apply_nms(df_final, iou_thresh=0.75)
-df_filter = dynamic_threshold_filter(df_nms, 4, detections=30)
+df_filter = dynamic_threshold_filter(df_nms, 4, detections=30) 
 
 df_submission = filter_predictions(df_filter, 'models/garbage_classifier.pth', data_path, yolo_conf_upper=0.01, binary_threshold=0.05, img_size=224, device=DEVICE)
 fix_dup_ids(df_submission, "submission.csv")
