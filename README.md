@@ -1,4 +1,4 @@
-# Riva Cytology Challenge - Track b
+# Riva Cytology Challenge - Track B
 
 This project implements a Deep Learning pipeline for cancer cell detection in Pap smear images, combining object detection (**YOLOv8**) and segmentation-based localization (**U-Net**) through heatmap regression.
 
