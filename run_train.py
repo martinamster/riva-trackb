@@ -38,5 +38,5 @@ train_yolo(root)
 
 """"
 This is just an example of how to run the training functions. It can be modified as needed
-For example, in the competition we trained two YOLO models with different cage sizes and also a U-Net model.
+For example, in the competition we trained two YOLO models with different box sizes and also a U-Net model.
 """
