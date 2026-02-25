@@ -26,9 +26,9 @@ UNET_PATH     = 'models/best_unet.pth'
 OUTPUT_DIR    = 'binary_dataset'
 MODEL_OUT     = 'garbage_classifier.pth'
 
-IOU_THRESHOLD_FP  = 0.1    # IoU < threshold con cualquier GT → FP (basura)
-CONF_THRESHOLD_FP = 0.001  # Ignorar predicciones de confianza muy baja
-IMG_SIZE          = 224    # Tamaño de crops para EfficientNet
+IOU_THRESHOLD_FP  = 0.1    
+CONF_THRESHOLD_FP = 0.001  
+IMG_SIZE          = 224   
 BATCH_SIZE        = 64
 EPOCHS            = 30
 LR                = 0.001
